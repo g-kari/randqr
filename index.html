@@ -137,6 +137,27 @@
                 return;
             }
 
+            // Check if QRCode library is loaded
+            if (typeof QRCode === 'undefined') {
+                console.log('QRCode library not yet loaded, waiting...');
+                // Show loading while waiting for library
+                loading.style.display = 'block';
+                container.innerHTML = '<p style="text-align: center;">Loading QR Code library...</p>';
+                
+                // Wait for QRCode library to load
+                let attempts = 0;
+                while (typeof QRCode === 'undefined' && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (typeof QRCode === 'undefined') {
+                    loading.style.display = 'none';
+                    container.innerHTML = '<p style="color: red; text-align: center;">Failed to load QR Code library. Please refresh the page.</p>';
+                    return;
+                }
+            }
+
             // Show loading
             loading.style.display = 'block';
             container.innerHTML = '';
