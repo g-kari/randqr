@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random QR Code Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls input {
+            padding: 10px;
+            margin: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+        .qr-container {
+            display: grid;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+        .qr-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .qr-code {
+            margin: 10px 0;
+        }
+        .qr-content {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Random QR Code Generator</h1>
+        <p>Generate random QR codes with unique content</p>
+    </div>
+    
+    <div class="controls">
+        <input type="number" id="countInput" placeholder="Number of QR codes" min="1" max="100" value="5">
+        <button onclick="generateQRCodes()">Generate QR Codes</button>
+    </div>
+    
+    <div id="loading" class="loading" style="display: none;">
+        Generating QR codes...
+    </div>
+    
+    <div id="qrContainer" class="qr-container">
+        <!-- QR codes will be generated here -->
+    </div>
+
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <script>
+        // Generate unique content for QR codes
+        function generateUniqueContent() {
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(2, 15);
+            const uuid = timestamp + '-' + random;
+            
+            // Generate different types of content
+            const contentTypes = [
+                `https://example.com/qr/${uuid}`,
+                `QR-${uuid}`,
+                `Random Text: ${uuid}`,
+                `Data: ${timestamp}-${random}`,
+                `ID: ${Math.random().toString(36).substring(2, 20)}`
+            ];
+            
+            return contentTypes[Math.floor(Math.random() * contentTypes.length)];
+        }
+
+        // Calculate optimal QR code size based on number of codes
+        function calculateQRSize(count) {
+            if (count <= 4) return 200;
+            if (count <= 9) return 150;
+            if (count <= 16) return 120;
+            if (count <= 25) return 100;
+            if (count <= 36) return 80;
+            return 60;
+        }
+
+        // Calculate grid columns based on number of codes
+        function calculateGridColumns(count) {
+            if (count <= 4) return Math.min(count, 2);
+            if (count <= 9) return 3;
+            if (count <= 16) return 4;
+            if (count <= 25) return 5;
+            return 6;
+        }
+
+        // Generate QR codes
+        async function generateQRCodes() {
+            const countInput = document.getElementById('countInput');
+            const container = document.getElementById('qrContainer');
+            const loading = document.getElementById('loading');
+            
+            const count = parseInt(countInput.value) || 5;
+            if (count < 1 || count > 100) {
+                alert('Please enter a number between 1 and 100');
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+            container.innerHTML = '';
+            
+            // Set grid layout
+            const columns = calculateGridColumns(count);
+            const qrSize = calculateQRSize(count);
+            container.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            
+            // Generate unique contents
+            const usedContents = new Set();
+            const contents = [];
+            
+            for (let i = 0; i < count; i++) {
+                let content;
+                do {
+                    content = generateUniqueContent();
+                } while (usedContents.has(content));
+                
+                usedContents.add(content);
+                contents.push(content);
+            }
+
+            // Generate QR codes
+            try {
+                for (let i = 0; i < count; i++) {
+                    const qrItem = document.createElement('div');
+                    qrItem.className = 'qr-item';
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'qr-code';
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'qr-content';
+                    contentDiv.textContent = contents[i];
+                    
+                    qrItem.appendChild(canvas);
+                    qrItem.appendChild(contentDiv);
+                    container.appendChild(qrItem);
+                    
+                    // Generate QR code
+                    await QRCode.toCanvas(canvas, contents[i], {
+                        width: qrSize,
+                        margin: 2,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error generating QR codes:', error);
+                container.innerHTML = '<p style="color: red; text-align: center;">Error generating QR codes. Please try again.</p>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Parse URL parameters
+        function parseURLParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const count = urlParams.get('count');
+            if (count) {
+                const countInput = document.getElementById('countInput');
+                countInput.value = Math.min(Math.max(parseInt(count), 1), 100);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            parseURLParams();
+            generateQRCodes();
+        });
+
+        // Allow Enter key to generate QR codes
+        document.getElementById('countInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateQRCodes();
+            }
+        });
+    </script>
+</body>
+</html>
