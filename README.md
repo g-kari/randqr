@@ -1,1 +1,3 @@
 # randqr
+
+init
