@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random QR Code Generator</title>
+    <title>ランダムQRコードジェネレーター</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,24 +71,24 @@
 </head>
 <body>
     <div class="header">
-        <h1>Random QR Code Generator</h1>
-        <p>Generate random QR codes with unique content</p>
+        <h1>ランダムQRコードジェネレーター</h1>
+        <p>ユニークなコンテンツでランダムなQRコードを生成</p>
     </div>
     
     <div class="controls">
-        <input type="number" id="countInput" placeholder="Number of QR codes" min="1" max="100" value="5">
-        <button onclick="generateQRCodes()">Generate QR Codes</button>
+        <input type="number" id="countInput" placeholder="QRコードの数" min="1" max="100" value="5">
+        <button onclick="generateQRCodes()">QRコードを生成</button>
     </div>
     
     <div id="loading" class="loading" style="display: none;">
-        Generating QR codes...
+        QRコードを生成中...
     </div>
     
     <div id="qrContainer" class="qr-container">
-        <!-- QR codes will be generated here -->
+        <!-- QRコードがここに生成されます -->
     </div>
 
-    <!-- QR Code generation using API instead of external library -->
+    <!-- 外部ライブラリの代わりにAPIを使用してQRコードを生成 -->
     
     <script>
         // Generate unique content for QR codes
@@ -136,7 +136,7 @@
             
             const count = parseInt(countInput.value) || 5;
             if (count < 1 || count > 100) {
-                alert('Please enter a number between 1 and 100');
+                alert('1から100の間の数字を入力してください');
                 return;
             }
 
@@ -179,7 +179,7 @@
                     img.style.width = qrSize + 'px';
                     img.style.height = qrSize + 'px';
                     img.style.display = 'block';
-                    img.alt = 'QR Code';
+                    img.alt = 'QRコード';
                     
                     // Create fallback QR pattern immediately
                     const fallbackQR = createFallbackQR(contents[i], qrSize);
@@ -214,7 +214,7 @@
                 }
             } catch (error) {
                 console.error('Error generating QR codes:', error);
-                container.innerHTML = '<p style="color: red; text-align: center;">Error generating QR codes. Please try again.</p>';
+                container.innerHTML = '<p style="color: red; text-align: center;">QRコードの生成中にエラーが発生しました。もう一度お試しください。</p>';
             } finally {
                 loading.style.display = 'none';
             }
